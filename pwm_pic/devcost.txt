@@ -1,0 +1,17 @@
+0.67   dipswitch*3
+1.91   PIC16f628
+0.61   dip socket*2
+0.68   c*4
+0.43   max232
+0.06   c100n*2
+0.27   pin strip
+3.37   copper clad
+0.29   subd9
+0.33   2200/35
+0.22   7805
+1.3    9v battery socket
+0.37   1n5819
+1.97   crystal osc
+----------
+12.5 euro
+
