@@ -193,7 +193,7 @@ namespace mydlg{
 				SendDlgItemMessage(dlghwnd,IDC_COMBO1,CB_SELECTSTRING,0,(LPARAM)strsel);
 			}else SetDlgItemText(dlghwnd,IDC_STATIC1,L"Comm Select Error");
 		}else{
-		SetDlgItemText(dlghwnd,IDC_STATIC1,L"Not Loaded");
+			SetDlgItemText(dlghwnd,IDC_STATIC1,L"Not Loaded");
 		}
 		updateAll();
 	}
@@ -298,6 +298,31 @@ namespace mydlg{
 		}
 	}
 
+
+
+	wchar_t cmdf[50] = L"";
+	wchar_t cmdd[50] = L"";
+
+	void trySetFromCmdLine() {
+		if (strsel[0]!=0 && cmdf[0] != 0 && cmdd[0] !=0) {
+			dfreq = conv(cmdf);
+			if (mydlg::dfreq < 1225)dfreq = 1225;
+			if (mydlg::dfreq > 5000000)dfreq = 5000000;
+			dduty = conv(cmdd) / 100.0;
+			if (dduty > 1.0)dduty = 1.0;
+			if (dduty < 0.0)dduty = 0.0;
+			mycom.setupcom(strsel);
+			if (!mycom.error) {
+				SetDlgItemText(dlghwnd, IDC_STATIC1, L"Loaded");
+				SendDlgItemMessage(dlghwnd, IDC_COMBO1, CB_ADDSTRING, 0, (LPARAM)strsel);
+				SendDlgItemMessage(dlghwnd, IDC_COMBO1, CB_SELECTSTRING, 0, (LPARAM)strsel);
+			}
+			else SetDlgItemText(dlghwnd, IDC_STATIC1, L"Comm Select Error");
+			onoff();
+			updateAll();
+		}
+	}
+
 }//namespace
 
 
@@ -307,7 +332,7 @@ LRESULT edit1proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
 		switch(wParam){
 		case  VK_RETURN:
 			mydlg::enterf();
-		break;
+			return TRUE;
 		}		
 	break;
 	}
@@ -321,7 +346,7 @@ LRESULT edit2proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
 		switch(wParam){
 		case  VK_RETURN:
 			mydlg::enterd();
-		break;
+			return TRUE;
 		}
 	break;
 	}
@@ -362,6 +387,7 @@ SCROLLINFO si;
 		 mydlg::defEdit1Proc=(WNDPROC)SetWindowLongPtr(GetDlgItem(hwnd,IDC_EDIT1),GWLP_WNDPROC,(LONG_PTR)edit1proc);
          mydlg::defEdit2Proc=(WNDPROC)SetWindowLongPtr(GetDlgItem(hwnd,IDC_EDIT2),GWLP_WNDPROC,(LONG_PTR)edit2proc);		 
 
+		 mydlg::trySetFromCmdLine();
     break;
 
 	case WM_KEYDOWN:
@@ -448,14 +474,50 @@ SCROLLINFO si;
 	break;
 	}
 	return TRUE;
+
 }//DlgProc()
 
 													       
 
+void getFromCommandLine(LPSTR cmdLine) {
+
+	int i = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] == ' ')i++;
+
+	int j = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] != ' ' && j < 40) {
+		mydlg::strsel[j] = cmdLine[i];
+		i++;
+		j++;
+	}
+	mydlg::strsel[j] = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] == ' ')i++;
+	
+
+	j = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] != ' ' && j < 40) {
+		mydlg::cmdf[j] = cmdLine[i];
+		i++;
+		j++;
+	}
+	mydlg::cmdf[j] = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] == ' ')i++;
+
+	j = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] != ' ' && j < 40) {
+		mydlg::cmdd[j] = cmdLine[i];
+		i++;
+		j++;
+	}
+	mydlg::cmdd[j] = 0;
+	while (cmdLine[i] != 0 && cmdLine[i] == ' ')i++;
+}
 
 
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE hPrev,LPSTR cmdLine,int nCmdShow){
+
+	getFromCommandLine(cmdLine);
 
 	DialogBox(hInst, 
 		MAKEINTRESOURCE(IDD_DIALOG1),
